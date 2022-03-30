@@ -113,9 +113,9 @@ classdef API_Arduino_IOPort < handle
             self.lastmsg = message;
             
             [~   , t1, self.errmsg] = IOPort('Write', self.ptr, [self.lastmsg self.end_of_msg_char]);
-            [data, t2, self.errmsg] = IOPort('Read' , self.ptr, 1, length('ok')+2);
+            [data, t2, self.errmsg] = IOPort('Read' , self.ptr, 1, length('ok'));
             
-            if ~strcmp('ok', char(data(1:end-2)))
+            if ~strcmp('ok', char(data))
                 self.status = 'ping:error';
                 warning('Ping failed')
                 success = false;
@@ -140,9 +140,9 @@ classdef API_Arduino_IOPort < handle
             self.lastmsg = true_message;
             
             [~   , t1, self.errmsg] = IOPort('Write', self.ptr, [self.lastmsg self.end_of_msg_char]);
-            [data, t2, self.errmsg] = IOPort('Read' , self.ptr, 1, length(message)+2);
+            [data, t2, self.errmsg] = IOPort('Read' , self.ptr, 1, length(message));
             
-            if ~strcmp(message, char(data(1:end-2)))
+            if ~strcmp(message, char(data))
                 self.status = 'echo:error';
                 warning('message sent and message received are different')
                 success = false;
@@ -167,9 +167,9 @@ classdef API_Arduino_IOPort < handle
             self.lastmsg = true_message;
             
             [~   , t1, self.errmsg] = IOPort('Write', self.ptr, [self.lastmsg self.end_of_msg_char]);
-            [data, t2, self.errmsg] = IOPort('Read' , self.ptr, 1 , 2);
+            [data, t2, self.errmsg] = IOPort('Read' , self.ptr, 1 , 2); % 10 bits will be sent using 2 bytes (16 bits)
             
-            value = bin2dec(reshape(dec2bin(data,8)',1,[]))*5/1023;
+            value = self.byte2volt(data);
             
         end
         

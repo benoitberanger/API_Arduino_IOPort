@@ -44,10 +44,10 @@ void loop() {
     }
 
     if(action == "ping") {
-      Serial.println("ok");
+      Serial.print("ok");
     }
     else if(action == "echo") {
-      Serial.println(val);
+      Serial.print(val);
     }
     else if(action == "adc") {
       unsigned int adc = performADC(val);
