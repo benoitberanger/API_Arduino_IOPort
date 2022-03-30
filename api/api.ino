@@ -49,6 +49,9 @@ void loop() {
     else if(action == "echo") {
       Serial.println(val);
     }
+    else if(action == "adc") {
+      Serial.println(performADC(val));
+    }
     else {
       Serial.println("ERROR");
     }
@@ -74,7 +77,7 @@ void loop() {
 
 }
 
-
+/*************************************************************************/
 /*
     SerialEvent occurs whenever a new data comes in the hardware serial RX. This
  routine is run between each time loop() runs, so using delay inside loop can
@@ -102,8 +105,9 @@ void serialEvent() {
   }
 }
 
+/*************************************************************************/
 // if the inputString has this format : cmd:val => extract 'cmd' & 'val'
-boolean split_inputString() {
+bool split_inputString() {
   int position = -1;
 
   // find if the separator is inside the inputString
@@ -113,7 +117,7 @@ boolean split_inputString() {
       break;
     }
   }
-  
+
   if(position == -1) { // not found
     return false;
   }
@@ -122,6 +126,35 @@ boolean split_inputString() {
     val = inputString.substring(position+1,inputString.length());
     return true;
   }
-  
+
 }
+
+/*************************************************************************/
+int performADC(const String channel) {
+  if (channel == "0") {
+    return analogRead(A0);
+  }
+  else if (channel == "0") {
+    return analogRead(A0);
+  }
+  else if (channel == "1") {
+    return analogRead(A1);
+  }
+  else if (channel == "2") {
+    return analogRead(A2);
+  }
+  else if (channel == "3") {
+    return analogRead(A3);
+  }
+  else if (channel == "4") {
+    return analogRead(A4);
+  }
+  else if (channel == "5") {
+    return analogRead(A5);
+  }
+  else {
+    return -1;
+  }
+}
+
 

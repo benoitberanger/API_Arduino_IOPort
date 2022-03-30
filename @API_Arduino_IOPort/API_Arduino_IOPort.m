@@ -1,5 +1,6 @@
 classdef API_Arduino_IOPort < handle
     
+    %======================================================================
     properties (SetAccess=protected)
         
         % set using methods
@@ -15,6 +16,7 @@ classdef API_Arduino_IOPort < handle
         
     end
     
+    %======================================================================
     properties (Hidden, SetAccess=protected, GetAccess=protected)
         max_message_size (1,1) double {mustBeInteger,mustBePositive} = 32;
         separator        (1,:) char                                  = ':';
@@ -25,6 +27,10 @@ classdef API_Arduino_IOPort < handle
         
     end
     
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    %======================================================================
     methods (Access=public)
         
         % -----------------------------------------------------------------
@@ -39,6 +45,8 @@ classdef API_Arduino_IOPort < handle
         end % function
         
         
+        % -----------------------------------------------------------------
+        % - Open
         % -----------------------------------------------------------------
         function Open(self, port, baudrate)
             
@@ -80,6 +88,8 @@ classdef API_Arduino_IOPort < handle
         
         
         % -----------------------------------------------------------------
+        % - Close
+        % -----------------------------------------------------------------
         function Close(self)
             if self.isopen
                 self.FlushPurge();
@@ -93,59 +103,98 @@ classdef API_Arduino_IOPort < handle
         
         
         % -----------------------------------------------------------------
-        function Ping(self)
+        % - Ping
+        % -----------------------------------------------------------------
+        function success = Ping(self)
             self.assert_isopen();
             self.FlushPurge();
             
             message = 'ping';
             self.lastmsg = message;
+            
             [~   , t1, self.errmsg] = IOPort('Write', self.ptr, [self.lastmsg self.end_of_msg_char]);
             [data, t2, self.errmsg] = IOPort('Read' , self.ptr, 1, length('ok')+2);
+            
             if ~strcmp('ok', char(data(1:end-2)))
                 self.status = 'ping:error';
                 warning('Ping failed')
+                success = false;
             else
                 self.status = 'ping:ok';
                 fprintf('Ping took %1.3fms \n', (t2-t1)*1000)
+                success = true;
             end
+            
         end % function
         
         % -----------------------------------------------------------------
-        function Echo(self, message)
+        % - Echo
+        % -----------------------------------------------------------------
+        function success = Echo(self, message)
             self.assert_isopen();
             self.FlushPurge();
             
             assert(ischar(message), 'message must be char')
             true_message = sprintf('echo%s%s', self.separator, message);
-            
             assert(length(true_message) < self.max_message_size-length(['echo' self.separator]), 'message must be char with length < %d', self.max_message_size)
-            
             self.lastmsg = true_message;
+            
             [~   , t1, self.errmsg] = IOPort('Write', self.ptr, [self.lastmsg self.end_of_msg_char]);
             [data, t2, self.errmsg] = IOPort('Read' , self.ptr, 1, length(message)+2);
+            
             if ~strcmp(message, char(data(1:end-2)))
                 self.status = 'echo:error';
                 warning('message sent and message received are different')
+                success = false;
             else
                 self.status = 'echo:ok';
                 fprintf('took %1.3fms to send ''%s'' and receive ''%s'' \n', (t2-t1)*1000, true_message, message)
+                success = true;
             end
+            
         end % function
+        
+        % -----------------------------------------------------------------
+        % - GetAnalog
+        % -----------------------------------------------------------------
+        function value = GetAnalog(self, channel)
+            self.assert_isopen();
+            self.FlushPurge();
+            
+            assert(isnumeric(channel) & isscalar(channel) & round(channel)==channel & abs(channel)==channel,...
+                'channel must be a positive integer')
+            true_message = sprintf('adc%s%d', self.separator, channel);
+            self.lastmsg = true_message;
+            
+            [~   , t1, self.errmsg] = IOPort('Write', self.ptr, [self.lastmsg self.end_of_msg_char]);
+            [data, t2, self.errmsg] = IOPort('Read' , self.ptr, 1 , 10);
+            data
+            char(data)
+            
+        end
+        
         
     end % methods
     
+    %======================================================================
     methods (Access=protected)
         
+        % -----------------------------------------------------------------
+        % - Purge
         % -----------------------------------------------------------------
         function Purge(self)
             IOPort('Purge', self.ptr);
         end % function
         
         % -----------------------------------------------------------------
+        % - Flush
+        % -----------------------------------------------------------------
         function Flush(self)
             IOPort('Flush', self.ptr);
         end % function
         
+        % -----------------------------------------------------------------
+        % - FlushPurge
         % -----------------------------------------------------------------
         function FlushPurge(self)
             IOPort('Flush', self.ptr);
