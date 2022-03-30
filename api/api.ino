@@ -35,7 +35,7 @@ void loop() {
 
   // fetch new "action" & clean string buffer
   if (stringComplete) {
-    
+
     if (split_inputString()) {
       action = cmd;
     }
@@ -46,11 +46,11 @@ void loop() {
     if(action == "ping") {
       Serial.println("ok");
     }
-    else if(cmd == "echo") {
+    else if(action == "echo") {
       Serial.println(val);
     }
     else {
-      Serial.println("WARNING:DELFALT:" + inputString);
+      Serial.println("ERROR");
     }
 
     // cleanup
@@ -90,9 +90,6 @@ void serialEvent() {
       inputString = ""; // flush it
     }
 
-    //    // add it to the inputString:
-    //    inputString += inputChar;
-
     // if the incoming character is a newline, set a flag so the main loop can
     // do something about it:
     if (inputChar == '\n') {
@@ -105,24 +102,26 @@ void serialEvent() {
   }
 }
 
+// if the inputString has this format : cmd:val => extract 'cmd' & 'val'
 boolean split_inputString() {
-  boolean has_separtor = false;
   int position = -1;
 
+  // find if the separator is inside the inputString
   for(unsigned int idx=0; idx<inputString.length(); idx++ ) {
     if(inputString.charAt(idx) == separator) {
       position = idx;
       break;
     }
   }
-  if(position == -1) {
+  
+  if(position == -1) { // not found
     return false;
   }
-  else {
-    cmd = inputString.substring(0         ,position-1          );
+  else { // found it, then extract cmd & val
+    cmd = inputString.substring(0         ,position            );
     val = inputString.substring(position+1,inputString.length());
+    return true;
   }
+  
 }
-
-
 

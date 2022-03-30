@@ -122,14 +122,13 @@ classdef API_Arduino_IOPort < handle
             
             self.lastmsg = true_message;
             [~   , t1, self.errmsg] = IOPort('Write', self.ptr, [self.lastmsg self.end_of_msg_char]);
-            [data, t2, self.errmsg] = IOPort('Read' , self.ptr, 1, length(true_message)+2);
-            char(data)
-            if ~strcmp(true_message, char(data(1:end-2)))
+            [data, t2, self.errmsg] = IOPort('Read' , self.ptr, 1, length(message)+2);
+            if ~strcmp(message, char(data(1:end-2)))
                 self.status = 'echo:error';
                 warning('message sent and message received are different')
             else
                 self.status = 'echo:ok';
-                fprintf('took %1.3fms to send and receive the message : %s \n', (t2-t1)*1000, true_message)
+                fprintf('took %1.3fms to send ''%s'' and receive ''%s'' \n', (t2-t1)*1000, true_message, message)
             end
         end
         
