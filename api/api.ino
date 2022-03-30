@@ -50,7 +50,10 @@ void loop() {
       Serial.println(val);
     }
     else if(action == "adc") {
-      Serial.println(performADC(val));
+      unsigned int adc = performADC(val);
+      unsigned char bytes[2];
+      uint_to_char2(adc, bytes);
+      Serial.write(bytes, 2);
     }
     else {
       Serial.println("ERROR");
@@ -64,16 +67,6 @@ void loop() {
     val            = "";
 
   }
-
-  /*
-    // read the input on analog pin 0:
-   // Convert the analog reading (which goes from 0 - 1023) to a voltage (0 - 5V):
-   voltage_A0 = analogRead(A0) * (5.0 / 1023.0);
-   // print out the value you read:
-   Serial.print(voltage_A0, 3);
-   Serial.print(voltage_A0+1,3);
-   delay(1);
-   */
 
 }
 
@@ -130,7 +123,7 @@ bool split_inputString() {
 }
 
 /*************************************************************************/
-int performADC(const String channel) {
+unsigned int performADC(const String channel) {
   if (channel == "0") {
     return analogRead(A0);
   }
@@ -153,8 +146,12 @@ int performADC(const String channel) {
     return analogRead(A5);
   }
   else {
-    return -1;
+    return 0;
   }
 }
 
-
+/*************************************************************************/
+void uint_to_char2(const unsigned int adc, unsigned char bytes[]) {
+  bytes[0] = (adc >> 8) & 0xFF;
+  bytes[1] = adc & 0xFF;
+}

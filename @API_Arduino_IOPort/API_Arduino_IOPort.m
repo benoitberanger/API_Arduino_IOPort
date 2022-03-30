@@ -167,9 +167,9 @@ classdef API_Arduino_IOPort < handle
             self.lastmsg = true_message;
             
             [~   , t1, self.errmsg] = IOPort('Write', self.ptr, [self.lastmsg self.end_of_msg_char]);
-            [data, t2, self.errmsg] = IOPort('Read' , self.ptr, 1 , 10);
-            data
-            char(data)
+            [data, t2, self.errmsg] = IOPort('Read' , self.ptr, 1 , 2);
+            
+            value = bin2dec(reshape(dec2bin(data,8)',1,[]))*5/1023;
             
         end
         
@@ -202,5 +202,37 @@ classdef API_Arduino_IOPort < handle
         end % function
         
     end % methods
+    
+    %======================================================================
+    methods (Static, Access=protected)
+        
+        % -----------------------------------------------------------------
+        % - byte2volt
+        % -----------------------------------------------------------------
+        function out = byte2volt( in )
+            
+            % in =
+            %      1   249
+            % bin_vstack =
+            %   2×8 char array
+            %     '00000001'
+            %     '11111001'
+            % bin_line =
+            %     '0000000111111001'
+            % integer_adc =
+            %    505
+            % voltage =
+            %        2.4682
+            % out =
+            %        2.4682
+            
+            bin_vstack = dec2bin(in,8);           % 1 byte = 8 bin
+            bin_line = reshape(bin_vstack',1,[]); % reshape the stack into line
+            integer_adc = bin2dec(bin_line);      % convert the binary into integer
+            out = integer_adc * 5/1023;           % Arduino ADC is 10bits so 1024 values, Vin = 5 Volts
+            
+        end % function
+        
+    end
     
 end % classef

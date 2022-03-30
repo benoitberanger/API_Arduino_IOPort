@@ -13,6 +13,5 @@ api.Echo('hello');
 api.Echo('much_longer_messsage');
 
 api.GetAnalog(0)
-api
 
 api.Close();
