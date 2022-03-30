@@ -17,6 +17,7 @@ classdef API_Arduino_IOPort < handle
     
     properties (Hidden, SetAccess=protected, GetAccess=protected)
         max_message_size (1,1) double {mustBeInteger,mustBePositive} = 32;
+        separator        (1,:) char                                  = ':';
         end_of_msg_char  (1,:) char                                  = sprintf('\n');
         def_port_linux   (1,:) char                                  = '/dev/ttyACM0'
         def_port_windows (1,:) char                                  = '<<TO BE DETERMINED>>'
@@ -24,7 +25,7 @@ classdef API_Arduino_IOPort < handle
         
     end
     
-    methods
+    methods (Access=public)
         
         % -----------------------------------------------------------------
         %                           Constructor
@@ -66,9 +67,12 @@ classdef API_Arduino_IOPort < handle
             
             [self.ptr, self.errmsg] = IOPort('OpenSerialPort', self.port, sprintf('BaudRate=%d', self.baudrate));
             if isempty(self.errmsg)
+                self.FlushPurge();
                 self.isopen = true;
+                self.status = 'ready';
                 fprintf('Device opened : %s \n', self.port);
             else
+                self.status = 'open:error';
                 error(self.errmsg);
             end
             
@@ -78,26 +82,75 @@ classdef API_Arduino_IOPort < handle
         % -----------------------------------------------------------------
         function Close(self)
             if self.isopen
+                self.FlushPurge();
                 IOPort('Close', self.ptr);
                 fprintf('Device closed : %s \n', self.port);
             else
                 warning('Device ALREADY closed.')
             end
+            self.status = 'closed';
         end % function
         
         
         % -----------------------------------------------------------------
-        function Echo(self, message)
-            assert(ischar(message) && length(message) < self.max_message_size, 'message must be char with length < %d', self.max_message_size)
+        function Ping(self)
             self.assert_isopen();
-            [~   , t1, self.errmsg] = IOPort('Write', self.ptr, [message self.end_of_msg_char]);
-            [data, t2, self.errmsg] = IOPort('Read' , self.ptr, 1, length(message)+2);
+            self.FlushPurge();
+            
+            message = 'ping';
             self.lastmsg = message;
-            if ~strcmp(message, char(data(1:end-2)))
-                error('message sent and message received are different')
+            [~   , t1, self.errmsg] = IOPort('Write', self.ptr, [self.lastmsg self.end_of_msg_char]);
+            [data, t2, self.errmsg] = IOPort('Read' , self.ptr, 1, length('ok')+2);
+            if ~strcmp('ok', char(data(1:end-2)))
+                self.status = 'ping:error';
+                warning('Ping failed')
             else
-                fprintf('took %1.3fms to send and receive the message : %s \n', (t2-t1)*1000, message)
+                self.status = 'ping:ok';
+                fprintf('Ping took %1.3fms \n', (t2-t1)*1000)
             end
+        end
+        
+        % -----------------------------------------------------------------
+        function Echo(self, message)
+            self.assert_isopen();
+            self.FlushPurge();
+            
+            assert(ischar(message), 'message must be char')
+            true_message = sprintf('echo%s%s', self.separator, message);
+            
+            assert(length(true_message) < self.max_message_size-length(['echo' self.separator]), 'message must be char with length < %d', self.max_message_size)
+            
+            self.lastmsg = true_message;
+            [~   , t1, self.errmsg] = IOPort('Write', self.ptr, [self.lastmsg self.end_of_msg_char]);
+            [data, t2, self.errmsg] = IOPort('Read' , self.ptr, 1, length(true_message)+2);
+            char(data)
+            if ~strcmp(true_message, char(data(1:end-2)))
+                self.status = 'echo:error';
+                warning('message sent and message received are different')
+            else
+                self.status = 'echo:ok';
+                fprintf('took %1.3fms to send and receive the message : %s \n', (t2-t1)*1000, true_message)
+            end
+        end
+        
+    end % methods
+    
+    methods (Access=protected)
+        
+        % -----------------------------------------------------------------
+        function Purge(self)
+            IOPort('Purge', self.ptr);
+        end
+        
+        % -----------------------------------------------------------------
+        function Flush(self)
+            IOPort('Flush', self.ptr);
+        end
+        
+        % -----------------------------------------------------------------
+        function FlushPurge(self)
+            IOPort('Flush', self.ptr);
+            IOPort('Purge', self.ptr);
         end
         
     end % methods
