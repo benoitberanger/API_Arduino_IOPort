@@ -108,7 +108,7 @@ classdef API_Arduino_IOPort < handle
                 self.status = 'ping:ok';
                 fprintf('Ping took %1.3fms \n', (t2-t1)*1000)
             end
-        end
+        end % function
         
         % -----------------------------------------------------------------
         function Echo(self, message)
@@ -130,7 +130,7 @@ classdef API_Arduino_IOPort < handle
                 self.status = 'echo:ok';
                 fprintf('took %1.3fms to send ''%s'' and receive ''%s'' \n', (t2-t1)*1000, true_message, message)
             end
-        end
+        end % function
         
     end % methods
     
@@ -139,18 +139,18 @@ classdef API_Arduino_IOPort < handle
         % -----------------------------------------------------------------
         function Purge(self)
             IOPort('Purge', self.ptr);
-        end
+        end % function
         
         % -----------------------------------------------------------------
         function Flush(self)
             IOPort('Flush', self.ptr);
-        end
+        end % function
         
         % -----------------------------------------------------------------
         function FlushPurge(self)
             IOPort('Flush', self.ptr);
             IOPort('Purge', self.ptr);
-        end
+        end % function
         
     end % methods
     
