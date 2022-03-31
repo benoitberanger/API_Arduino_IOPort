@@ -12,6 +12,6 @@ end
 api.Echo('hello');
 api.Echo('much_longer_messsage');
 
-api.GetAnalog(0)
+[value, dt] = api.GetAnalog(0)
 
 api.Close();

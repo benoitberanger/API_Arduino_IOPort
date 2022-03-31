@@ -40,7 +40,10 @@ classdef API_Arduino_IOPort < handle
             % pass
         end % function
         
-        function assert_isopen(self)
+        % -----------------------------------------------------------------
+        % - Assert_isopen
+        % -----------------------------------------------------------------
+        function Assert_isopen(self)
             assert(self.isopen, 'device not opened')
         end % function
         
@@ -105,8 +108,8 @@ classdef API_Arduino_IOPort < handle
         % -----------------------------------------------------------------
         % - Ping
         % -----------------------------------------------------------------
-        function success = Ping(self)
-            self.assert_isopen();
+        function varargout = Ping(self)
+            self.Assert_isopen();
             self.FlushPurge();
             
             message = 'ping';
@@ -115,14 +118,24 @@ classdef API_Arduino_IOPort < handle
             [~   , t1, self.errmsg] = IOPort('Write', self.ptr, [self.lastmsg self.end_of_msg_char]);
             [data, t2, self.errmsg] = IOPort('Read' , self.ptr, 1, length('ok'));
             
+            dt = (t2-t1)*1000;
+            
             if ~strcmp('ok', char(data))
                 self.status = 'ping:error';
-                warning('Ping failed')
-                success = false;
+                if nargout == 0
+                    warning('Ping failed')
+                else
+                    varargout{1} = false;
+                    varargout{2} = dt;
+                end
             else
                 self.status = 'ping:ok';
-                fprintf('Ping took %1.3fms \n', (t2-t1)*1000)
-                success = true;
+                if nargout == 0
+                    fprintf('Ping took %1.3fms \n', dt)
+                else
+                    varargout{1} = true;
+                    varargout{2} = dt;
+                end
             end
             
         end % function
@@ -130,8 +143,8 @@ classdef API_Arduino_IOPort < handle
         % -----------------------------------------------------------------
         % - Echo
         % -----------------------------------------------------------------
-        function success = Echo(self, message)
-            self.assert_isopen();
+        function varargout = Echo(self, message)
+            self.Assert_isopen();
             self.FlushPurge();
             
             assert(ischar(message), 'message must be char')
@@ -142,14 +155,24 @@ classdef API_Arduino_IOPort < handle
             [~   , t1, self.errmsg] = IOPort('Write', self.ptr, [self.lastmsg self.end_of_msg_char]);
             [data, t2, self.errmsg] = IOPort('Read' , self.ptr, 1, length(message));
             
+            dt = (t2-t1)*1000;
+            
             if ~strcmp(message, char(data))
                 self.status = 'echo:error';
-                warning('message sent and message received are different')
-                success = false;
+                if nargout == 0
+                    warning('message sent and message received are different')
+                else
+                    varargout{1} = false;
+                    varargout{2} = dt;
+                end
             else
                 self.status = 'echo:ok';
-                fprintf('took %1.3fms to send ''%s'' and receive ''%s'' \n', (t2-t1)*1000, true_message, message)
-                success = true;
+                if nargout == 0
+                    fprintf('took %1.3fms to send ''%s'' and receive ''%s'' \n', dt, true_message, message)
+                else
+                    varargout{1} = true;
+                    varargout{2} = dt;
+                end
             end
             
         end % function
@@ -157,8 +180,8 @@ classdef API_Arduino_IOPort < handle
         % -----------------------------------------------------------------
         % - GetAnalog
         % -----------------------------------------------------------------
-        function value = GetAnalog(self, channel)
-            self.assert_isopen();
+        function [value, dt] = GetAnalog(self, channel)
+            self.Assert_isopen();
             self.FlushPurge();
             
             assert(isnumeric(channel) & isscalar(channel) & round(channel)==channel & abs(channel)==channel,...
@@ -170,6 +193,7 @@ classdef API_Arduino_IOPort < handle
             [data, t2, self.errmsg] = IOPort('Read' , self.ptr, 1 , 2); % 10 bits will be sent using 2 bytes (16 bits)
             
             value = self.byte2volt(data);
+            dt = (t2-t1)*1000;
             
         end
         
