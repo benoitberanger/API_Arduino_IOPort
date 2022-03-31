@@ -18,7 +18,7 @@ classdef API_Arduino_IOPort < handle
     
     %======================================================================
     properties (Hidden, SetAccess=protected, GetAccess=protected)
-        max_message_size (1,1) double {mustBeInteger,mustBePositive} = 32;
+        max_message_size (1,1) double {mustBeInteger,mustBePositive} = 128;
         separator        (1,:) char                                  = ':';
         end_of_msg_char  (1,:) char                                  = sprintf('\n');
         def_port_linux   (1,:) char                                  = '/dev/ttyACM0'
@@ -245,19 +245,17 @@ classdef API_Arduino_IOPort < handle
             %     '0000000111111001'
             % integer_adc =
             %    505
-            % voltage =
-            %        2.4682
             % out =
             %        2.4682
             
             out = zeros(1, nChan);
             
-            bin_vstack = dec2bin(datain,8);       % 1 byte = 8 bin
+            bin_vstack = dec2bin(datain,8); % 1 byte = 8 bit
             for idx = 1 : nChan
                 
                 bin_line = reshape(bin_vstack([idx*2-1 idx*2],:)',1,[]); % reshape the stack into line
-                integer_adc = bin2dec(bin_line);      % convert the binary into integer
-                out(idx) = integer_adc * 5/1023;           % Arduino ADC is 10bits so 1024 values, Vin = 5 Volts
+                integer_adc = bin2dec(bin_line);                         % convert the binary into integer
+                out(idx) = integer_adc * 5/1023;                         % Arduino ADC is 10bits so 1024 values, Vin = 5 Volts
                 
             end
             

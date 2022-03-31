@@ -12,7 +12,7 @@ end
 api.Echo('hello');
 api.Echo('much_longer_messsage!');
 
-channel = [0 1 2 3 4 5]; % index start at 0
+channel = [0 1 2 3 4 5]; % index start at 0, 5 ADC on my model
 for idx = 1 : length(channel)
     channelVect = channel(1) : channel(idx);
     [value, dt] = api.GetAnalog(channelVect);

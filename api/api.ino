@@ -1,5 +1,5 @@
 #define BAUDRATE   115200 // 300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200
-#define BUFFERSIZE     32 // make sure to not overflow the input string
+#define BUFFERSIZE    128 // make sure to not overflow the input string
 #define SEPARATOR     ':' // <cmd><sep><val> such as 'echo:say_ok'
 
 /*************************************************************************/
@@ -54,9 +54,9 @@ void loop() {
     else if(action == "adc") {
       for(int idx=0; idx<val.length(); idx++) {
         unsigned int adc = performADC(val.charAt(idx));
-        unsigned char bytes[2];
-        uint_to_char2(adc, bytes);
-        Serial.write(bytes, 2);
+        unsigned char bytes[2];    // byte buffer
+        uint_to_char2(adc, bytes); // fill 10bit message into 2 bytes buffer
+        Serial.write(bytes, 2);    // send buffer
       }
     }
 
@@ -86,19 +86,21 @@ void serialEvent() {
     // get the new byte:
     char inputChar = (char)Serial.read();
 
-    // check if string is not too long
-    if (inputString.length() >= BUFFERSIZE) {
-      inputString = ""; // flush it
-    }
-
     // if the incoming character is a newline, set a flag so the main loop can
     // do something about it:
     if (inputChar == '\n') {
       stringComplete = true;
     }
     else {
+
+      // check if string is not too long
+      if (inputString.length() >= BUFFERSIZE-1) {
+        inputString = ""; // flush it
+      }
+
       // add it to the inputString:
       inputString += inputChar;
+
     }
   }
 }
@@ -109,6 +111,7 @@ bool split_inputString() {
   int position = -1;
 
   // find if the SEPARATOR is inside the inputString
+  // there is builtin function/method for the, so need to code it...
   for(unsigned int idx=0; idx<inputString.length(); idx++ ) {
     if(inputString.charAt(idx) == SEPARATOR) {
       position = idx;
@@ -154,10 +157,13 @@ unsigned int performADC(const char channel) {
 
 /*************************************************************************/
 // adc is 10bits, and 1*8<10<2*8 => we will send 2 bytes
+// adapted from https://stackoverflow.com/questions/3784263/converting-an-int-into-a-4-byte-char-array-c
 void uint_to_char2(const unsigned int adc, unsigned char bytes[]) {
   bytes[0] = (adc >> 8) & 0xFF;
-  bytes[1] = adc & 0xFF;
+  bytes[1] = adc        & 0xFF;
 }
+
+
 
 
 
