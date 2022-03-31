@@ -1,11 +1,8 @@
+#define BAUDRATE   115200 // 300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200
+#define BUFFERSIZE     32 // make sure to not overflow the input string
+#define SEPARATOR     ':' // <cmd><sep><val> such as 'echo:say_ok'
 
 /*************************************************************************/
-// paramters
-const long         baudrate       = 115200; // 300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200
-const unsigned int bufferSize     = 32;     // make sure to not overflow the input string
-const char         separator      = ':';    // <cmd><sep><val> such as 'echo:say_ok'
-
-// variables
 float              voltage_A0     = 0;      // voltage ADC A0
 String             inputString    = "";     // a String to hold incoming data
 bool               stringComplete = false;  // whether the string is complete
@@ -18,9 +15,9 @@ String             val            = "";     // value tu use foe the "cammand" ==
 void setup() {
 
   // initialize serial communication at <badrate> bits per second:
-  Serial.begin(baudrate);
+  Serial.begin(BAUDRATE);
 
-  //inputString.reserve(bufferSize);
+  //inputString.reserve(BUFFERSIZE);
 
   // wait for serial port to connect. Needed for native USB port only
   while (!Serial) {
@@ -82,7 +79,7 @@ void serialEvent() {
     char inputChar = (char)Serial.read();
 
     // check if string is not too long
-    if (inputString.length() >= bufferSize) {
+    if (inputString.length() >= BUFFERSIZE) {
       inputString = ""; // flush it
     }
 
@@ -103,9 +100,9 @@ void serialEvent() {
 bool split_inputString() {
   int position = -1;
 
-  // find if the separator is inside the inputString
+  // find if the SEPARATOR is inside the inputString
   for(unsigned int idx=0; idx<inputString.length(); idx++ ) {
-    if(inputString.charAt(idx) == separator) {
+    if(inputString.charAt(idx) == SEPARATOR) {
       position = idx;
       break;
     }
