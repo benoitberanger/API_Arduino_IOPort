@@ -17,7 +17,7 @@ void setup() {
   // initialize serial communication at <badrate> bits per second:
   Serial.begin(BAUDRATE);
 
-  //inputString.reserve(BUFFERSIZE);
+  inputString.reserve(BUFFERSIZE);
 
   // wait for serial port to connect. Needed for native USB port only
   while (!Serial) {
@@ -33,6 +33,7 @@ void loop() {
   // fetch new "action" & clean string buffer
   if (stringComplete) {
 
+    // check inputString format
     if (split_inputString()) {
       action = cmd;
     }
@@ -40,6 +41,7 @@ void loop() {
       action = inputString;
     }
 
+    // ACTION switch
     if(action == "ping") {
       Serial.print("ok");
     }
@@ -121,10 +123,7 @@ bool split_inputString() {
 
 /*************************************************************************/
 unsigned int performADC(const String channel) {
-  if (channel == "0") {
-    return analogRead(A0);
-  }
-  else if (channel == "0") {
+  if      (channel == "0") {
     return analogRead(A0);
   }
   else if (channel == "1") {
@@ -148,6 +147,7 @@ unsigned int performADC(const String channel) {
 }
 
 /*************************************************************************/
+// adc is 10bits, and 1*8<10<2*8 => we will send 2 bytes
 void uint_to_char2(const unsigned int adc, unsigned char bytes[]) {
   bytes[0] = (adc >> 8) & 0xFF;
   bytes[1] = adc & 0xFF;
