@@ -184,15 +184,15 @@ classdef API_Arduino_IOPort < handle
             self.Assert_isopen();
             self.FlushPurge();
             
-            assert(isnumeric(channel) & isscalar(channel) & round(channel)==channel & abs(channel)==channel,...
+            assert(isnumeric(channel) & all(round(channel)==channel) & all(abs(channel)==channel),...
                 'channel must be a positive integer')
-            true_message = sprintf('adc%s%d', self.separator, channel);
+            true_message = sprintf('adc%s%s', self.separator, num2str(channel,'%d')); % [0 1 2] => '012'
             self.lastmsg = true_message;
             
             [~   , t1, self.errmsg] = IOPort('Write', self.ptr, [self.lastmsg self.end_of_msg_char]);
-            [data, t2, self.errmsg] = IOPort('Read' , self.ptr, 1 , 2); % 10 bits will be sent using 2 bytes (16 bits)
+            [data, t2, self.errmsg] = IOPort('Read' , self.ptr, 1 , 2*length(channel)); % 10 bits will be sent using 2 bytes (16 bits)
             
-            value = self.byte2volt(data);
+            value = self.byte2volt(data,length(channel));
             dt = (t2-t1)*1000;
             
         end
@@ -233,7 +233,7 @@ classdef API_Arduino_IOPort < handle
         % -----------------------------------------------------------------
         % - byte2volt
         % -----------------------------------------------------------------
-        function out = byte2volt( in )
+        function out = byte2volt( datain, nChan )
             
             % in =
             %      1   249
@@ -250,10 +250,17 @@ classdef API_Arduino_IOPort < handle
             % out =
             %        2.4682
             
-            bin_vstack = dec2bin(in,8);           % 1 byte = 8 bin
-            bin_line = reshape(bin_vstack',1,[]); % reshape the stack into line
-            integer_adc = bin2dec(bin_line);      % convert the binary into integer
-            out = integer_adc * 5/1023;           % Arduino ADC is 10bits so 1024 values, Vin = 5 Volts
+            out = zeros(1, nChan);
+            
+            bin_vstack = dec2bin(datain,8);       % 1 byte = 8 bin
+            for idx = 1 : nChan
+                
+                bin_line = reshape(bin_vstack([idx*2-1 idx*2],:)',1,[]); % reshape the stack into line
+                integer_adc = bin2dec(bin_line);      % convert the binary into integer
+                out(idx) = integer_adc * 5/1023;           % Arduino ADC is 10bits so 1024 values, Vin = 5 Volts
+                
+            end
+            
             
         end % function
         

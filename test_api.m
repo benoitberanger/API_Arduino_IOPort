@@ -10,8 +10,13 @@ for i = 1 : 5
 end
 
 api.Echo('hello');
-api.Echo('much_longer_messsage');
+api.Echo('much_longer_messsage!');
 
-[value, dt] = api.GetAnalog(0)
+channel = [0 1 2 3 4 5]; % index start at 0
+for idx = 1 : length(channel)
+    channelVect = channel(1) : channel(idx);
+    [value, dt] = api.GetAnalog(channelVect);
+    fprintf('took %1.3fms to fetch %d analog read \n', dt, length(channelVect))
+end
 
 api.Close();

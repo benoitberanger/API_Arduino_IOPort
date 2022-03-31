@@ -42,18 +42,24 @@ void loop() {
     }
 
     // ACTION switch
+
     if(action == "ping") {
       Serial.print("ok");
     }
+
     else if(action == "echo") {
       Serial.print(val);
     }
+
     else if(action == "adc") {
-      unsigned int adc = performADC(val);
-      unsigned char bytes[2];
-      uint_to_char2(adc, bytes);
-      Serial.write(bytes, 2);
+      for(int idx=0; idx<val.length(); idx++) {
+        unsigned int adc = performADC(val.charAt(idx));
+        unsigned char bytes[2];
+        uint_to_char2(adc, bytes);
+        Serial.write(bytes, 2);
+      }
     }
+
     else {
       Serial.println("ERROR");
     }
@@ -122,23 +128,23 @@ bool split_inputString() {
 }
 
 /*************************************************************************/
-unsigned int performADC(const String channel) {
-  if      (channel == "0") {
+unsigned int performADC(const char channel) {
+  if      (channel == '0') {
     return analogRead(A0);
   }
-  else if (channel == "1") {
+  else if (channel == '1') {
     return analogRead(A1);
   }
-  else if (channel == "2") {
+  else if (channel == '2') {
     return analogRead(A2);
   }
-  else if (channel == "3") {
+  else if (channel == '3') {
     return analogRead(A3);
   }
-  else if (channel == "4") {
+  else if (channel == '4') {
     return analogRead(A4);
   }
-  else if (channel == "5") {
+  else if (channel == '5') {
     return analogRead(A5);
   }
   else {
@@ -152,3 +158,6 @@ void uint_to_char2(const unsigned int adc, unsigned char bytes[]) {
   bytes[0] = (adc >> 8) & 0xFF;
   bytes[1] = adc & 0xFF;
 }
+
+
+
