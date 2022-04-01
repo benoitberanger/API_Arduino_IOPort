@@ -160,10 +160,6 @@ unsigned int performADC(const char channel) {
 // adapted from https://stackoverflow.com/questions/3784263/converting-an-int-into-a-4-byte-char-array-c
 void uint_to_char2(const unsigned int adc, unsigned char bytes[]) {
   bytes[0] = (adc >> 8) & 0xFF;
-  bytes[1] = adc        & 0xFF;
+  bytes[1] =  adc       & 0xFF;
 }
-
-
-
-
 

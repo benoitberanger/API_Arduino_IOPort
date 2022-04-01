@@ -1,29 +1,32 @@
 classdef API_Arduino_IOPort < handle
+    % API_Arduino_IOPort class to communicate to Arduino.
+    % Please check <a href="matlab: type test_API_Arduino_IOPort">test_API_Arduino_IOPort</a> for a demo.
+    % The class inherits from "handle" basic class, but all "handle" methods are hidden, helping readability.
     
     %======================================================================
     properties (SetAccess=protected)
         
         % set using methods
-        port     char    = ''    % this is pointer
-        baudrate double  = []    %
+        port     char    = ''    % "port" is some kind of adress for the device.
         
         % internal variables
-        isopen   logical = false %
-        status   char    = ''    % this is the current state of the API
-        errmsg   char    = ''    % from IOPort
-        ptr      double  = []    % pointer to the device
+        isopen   logical = false % flag
+        status   char    = ''    % current state of the API
+        errmsg   char    = ''    % last error message from IOPort
+        ptr      double  = []    % pointer to the opened device
         lastmsg  char    = ''    % last message sent withe IOPort('Write',msg)
         
     end
     
     %======================================================================
     properties (Hidden, SetAccess=protected, GetAccess=protected)
-        max_message_size (1,1) double {mustBeInteger,mustBePositive} = 128;
-        separator        (1,:) char                                  = ':';
-        end_of_msg_char  (1,:) char                                  = sprintf('\n');
+        
+        baudrate         (1,1) double {mustBeInteger,mustBePositive} = 115200         % WARNING : has to be the same in the matlab class and in the cpp
+        max_message_size (1,1) double {mustBeInteger,mustBePositive} = 128            % WARNING : has to be the same in the matlab class and in the cpp
+        separator        (1,:) char                                  = ':'            % WARNING : has to be the same in the matlab class and in the cpp
+        end_of_msg_char  (1,:) char                                  = sprintf('\n')  % WARNING : has to be the same in the matlab class and in the cpp
         def_port_linux   (1,:) char                                  = '/dev/ttyACM0'
         def_port_windows (1,:) char                                  = '<<TO BE DETERMINED>>'
-        def_baudrate     (1,1) double {mustBeInteger,mustBePositive} = 115200
         
     end
     
@@ -37,7 +40,10 @@ classdef API_Arduino_IOPort < handle
         %                           Constructor
         % -----------------------------------------------------------------
         function self = API_Arduino_IOPort(varargin)
-            % pass
+            assert( ~isempty(which('IOPort')), '"IOPort" not found : check Psychtooblox installation => http://psychtoolbox.org/' )
+            if nargin
+                warning('no input paramters for the constructor')
+            end
         end % function
         
         % -----------------------------------------------------------------
@@ -51,17 +57,10 @@ classdef API_Arduino_IOPort < handle
         % -----------------------------------------------------------------
         % - Open
         % -----------------------------------------------------------------
-        function Open(self, port, baudrate)
+        function Open(self, port)
             
             if self.isopen
                 error('device already opened')
-            end
-            
-            % baudrate
-            if nargin < 3
-                self.baudrate = self.def_baudrate;
-            else
-                self.baudrate = baudrate;
             end
             
             % port
@@ -259,9 +258,32 @@ classdef API_Arduino_IOPort < handle
                 
             end
             
-            
         end % function
         
+    end % methods
+    
+    %======================================================================
+    % hide superclass "handle" methods, to simplify readability and tab auto-completion
+    % src : https://fr.mathworks.com/matlabcentral/answers/23535-suppressing-superclass-methods-events
+    methods (Hidden)
+        function varargout = findobj(O,varargin)
+            varargout = findobj@handle(O,varargin{:});
+        end
+        function varargout = findprop(O,varargin)
+            varargout = findprop@handle(O,varargin{:});
+        end
+        function varargout = addlistener(O,varargin)
+            varargout = addlistener@handle(O,vsarargin{:});
+        end
+        function varargout = notify(O,varargin)
+            varargout = notify@handle(O,varargin{:});
+        end
+        function varargout = listener(O,varargin)
+            varargout = listener@handle(O,varargin{:});
+        end
+        function varargout = delete(O,varargin)
+            varargout = delete@handle(O,varargin{:});
+        end
     end
     
 end % classef
