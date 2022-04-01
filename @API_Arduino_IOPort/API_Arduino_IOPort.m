@@ -40,17 +40,33 @@ classdef API_Arduino_IOPort < handle
         %                           Constructor
         % -----------------------------------------------------------------
         function self = API_Arduino_IOPort(varargin)
+            % Create empty object
+            %
+            % SYNTAX
+            %   api = API_Arduino_IOPort();
+            %
+            
             assert( ~isempty(which('IOPort')), '"IOPort" not found : check Psychtooblox installation => http://psychtoolbox.org/' )
+            
             if nargin
                 warning('no input paramters for the constructor')
             end
+            
         end % function
+        
         
         % -----------------------------------------------------------------
         % - Assert_isopen
         % -----------------------------------------------------------------
         function Assert_isopen(self)
+            % Check if device is opened, or throw an error
+            %
+            % SYNTAX
+            %   api.Assert_isopen();
+            %
+            
             assert(self.isopen, 'device not opened')
+            
         end % function
         
         
@@ -58,6 +74,12 @@ classdef API_Arduino_IOPort < handle
         % - Open
         % -----------------------------------------------------------------
         function Open(self, port)
+            % Open device on "port". When no "port" is provided, it uses the default one.
+            %
+            % SYNTAX
+            %   api.Open();
+            %   api.Open('/dev/ttyACM0');
+            %
             
             if self.isopen
                 error('device already opened')
@@ -93,6 +115,12 @@ classdef API_Arduino_IOPort < handle
         % - Close
         % -----------------------------------------------------------------
         function Close(self)
+            % Close the device
+            %
+            % SYNTAX
+            %   api.Close();
+            %
+            
             if self.isopen
                 self.FlushPurge();
                 IOPort('Close', self.ptr);
@@ -101,6 +129,7 @@ classdef API_Arduino_IOPort < handle
                 warning('Device ALREADY closed.')
             end
             self.status = 'closed';
+            
         end % function
         
         
@@ -108,6 +137,15 @@ classdef API_Arduino_IOPort < handle
         % - Ping
         % -----------------------------------------------------------------
         function varargout = Ping(self)
+            % Ping will send a message and listen for the answer.
+            % This is usefull after Open() to check if the communication is working.
+            % Do sevral Ping() and don't panic if the first 2 or 3 fail, this espacially after Arduino initilization
+            %
+            % SYNTAX
+            %                   api.Ping(); % this prints a message
+            %   [isok, dtime] = api.Ping(); % no print, but value are in the output
+            %
+            
             self.Assert_isopen();
             self.FlushPurge();
             
@@ -143,6 +181,13 @@ classdef API_Arduino_IOPort < handle
         % - Echo
         % -----------------------------------------------------------------
         function varargout = Echo(self, message)
+            % This method is like a "demo". You send a message, and the device will send it back to you.
+            %
+            % SYNTAX
+            %                   api.Echo('my_message'); % this prints a message
+            %   [isok, dtime] = api.Echo('my_message'); % no print, but value are in the output
+            %
+            
             self.Assert_isopen();
             self.FlushPurge();
             
@@ -180,6 +225,13 @@ classdef API_Arduino_IOPort < handle
         % - GetAnalog
         % -----------------------------------------------------------------
         function [value, dt] = GetAnalog(self, channel)
+            % Ask Arduino to preform analogRead() and send the value
+            %
+            % SYNTAX
+            %   [value, dt] = api.GetAnalog(  0    ) % ask for channel A0,        value is (1 x 1)
+            %   [value, dt] = api.GetAnalog( [0 1] ) % ask for channel A0 and A1, value is (1 x 2)
+            %
+            
             self.Assert_isopen();
             self.FlushPurge();
             
@@ -189,7 +241,7 @@ classdef API_Arduino_IOPort < handle
             self.lastmsg = true_message;
             
             [~   , t1, self.errmsg] = IOPort('Write', self.ptr, [self.lastmsg self.end_of_msg_char]);
-            [data, t2, self.errmsg] = IOPort('Read' , self.ptr, 1 , 2*length(channel)); % 10 bits will be sent using 2 bytes (16 bits)
+            [data, t2, self.errmsg] = IOPort('Read' , self.ptr, 1 , 2*length(channel)); % 10 useful bits will be sent using 2 bytes (16 bits)
             
             value = self.byte2volt(data,length(channel));
             dt = (t2-t1)*1000;
