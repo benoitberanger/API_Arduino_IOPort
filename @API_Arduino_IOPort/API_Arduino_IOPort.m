@@ -266,23 +266,23 @@ classdef API_Arduino_IOPort < handle
     % hide superclass "handle" methods, to simplify readability and tab auto-completion
     % src : https://fr.mathworks.com/matlabcentral/answers/23535-suppressing-superclass-methods-events
     methods (Hidden)
-        function varargout = findobj(O,varargin)
-            varargout = findobj@handle(O,varargin{:});
+        function varargout = findobj(self,varargin)
+            varargout = findobj@handle(self,varargin{:});
         end
-        function varargout = findprop(O,varargin)
-            varargout = findprop@handle(O,varargin{:});
+        function varargout = findprop(self,varargin)
+            varargout = findprop@handle(self,varargin{:});
         end
-        function varargout = addlistener(O,varargin)
-            varargout = addlistener@handle(O,vsarargin{:});
+        function varargout = addlistener(self,varargin)
+            varargout = addlistener@handle(self,varargin{:});
         end
-        function varargout = notify(O,varargin)
-            varargout = notify@handle(O,varargin{:});
+        function varargout = notify(self,varargin)
+            varargout = notify@handle(self,varargin{:});
         end
-        function varargout = listener(O,varargin)
-            varargout = listener@handle(O,varargin{:});
+        function varargout = listener(self,varargin)
+            varargout = listener@handle(self,varargin{:});
         end
-        function varargout = delete(O,varargin)
-            varargout = delete@handle(O,varargin{:});
+        function varargout = delete(self,varargin)
+            varargout = delete@handle(self,varargin{:});
         end
     end
     
