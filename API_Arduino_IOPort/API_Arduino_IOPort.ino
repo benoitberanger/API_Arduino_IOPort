@@ -24,6 +24,11 @@ void setup() {
     ;
   }
 
+  // make sure the buffer is empty
+  while (Serial.available() > 0) {
+    Serial.read();
+  }
+
 }
 
 /*************************************************************************/
