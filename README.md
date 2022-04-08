@@ -10,4 +10,9 @@ Code to access [Arduino](https://www.arduino.cc/) interface between MATLAB using
 Clone or download this repo, and add it to MATLAB's path.
 
 # Test / Demo script
-Check this script: [test_API_Arduino_IOPort](test_API_Arduino_IOPort.m)
+Check this script:
+- [test_adc](test_adc.m) for ADC => upload "arduino_adc.ino"
+- [test_pp](test_pp.m) for Parallel Port => upload "arduino_pp.ino"
+
+# Important
+Arduino cannot work with both mods simultaniously : you have to choose (and upload) 1 program between "adc" and "pp"(parallel port)
