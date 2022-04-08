@@ -167,4 +167,3 @@ void uint_to_char2(const unsigned int adc, unsigned char bytes[]) {
   bytes[0] = (adc >> 8) & 0xFF;
   bytes[1] =  adc       & 0xFF;
 }
-

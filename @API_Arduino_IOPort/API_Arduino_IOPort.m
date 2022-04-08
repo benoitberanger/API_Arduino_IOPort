@@ -14,7 +14,7 @@ classdef API_Arduino_IOPort < handle
         status   char    = ''    % current state of the API
         errmsg   char    = ''    % last error message from IOPort
         ptr      double  = []    % pointer to the opened device
-        lastmsg  char    = ''    % last message sent withe IOPort('Write',msg)
+        lastmsg          = ''    % last message sent withe IOPort('Write',msg)
         
     end
     
@@ -248,6 +248,23 @@ classdef API_Arduino_IOPort < handle
             
         end
         
+        % -----------------------------------------------------------------
+        % - Send Byte
+        % -----------------------------------------------------------------
+        function SendByte(self, message)
+            % Send 8bit message
+            %
+            % SYNTAX
+            %   api.SendByte( 255 ) % all parallel port pins up
+            %
+            
+            self.Assert_isopen();
+            self.FlushPurge();
+            
+            self.lastmsg = uint8(message);
+            [~, ~, self.errmsg] = IOPort('Write', self.ptr, self.lastmsg );
+            
+        end
         
     end % methods
     

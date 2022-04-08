@@ -9,6 +9,8 @@ octave-workspace
 
 # Other
 *.wav
+test/*
+dev/*
 
 # OS generated files
 Thumbs.db
